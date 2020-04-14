@@ -29,8 +29,19 @@ The `pip install` command should be issued from within the same `conda` environm
 
 ## Dependencies
 
-- foyer >= 0.7.2
+- foyer > 0.7.3
 - ambertools (for the `antefoyer.ante_atomtyping` and `antefoyer.ante_charges` functions)
+
+Foyer must be installed from source:
+
+	git clone https://github.com/mosdef-hub/foyer.git
+	cd foyer/
+	conda install -c omnia -c conda-forge -c mosdef --file requirements.txt
+	pip install .
+
+Ambertools can be installed via conda:
+
+	conda install -c conda-forge ambertools
 
 ## Usage
 There are two primary workflows for atomtyping with `antefoyer`. The first uses the traditional `foyer` approach with SMARTS strings defined in `antefoyer/xml/gaff.xml`. 
@@ -40,20 +51,19 @@ There are two primary workflows for atomtyping with `antefoyer`. The first uses 
     import mbuild as mb
     
     # Build/import a molecule
-    molecule = mb.load('CCC',smarts=True)
+    molecule = mb.load('CCC',smiles=True)
     
     # Load GAFF
     GAFF = foyer.forcefields.load_GAFF()
     
     # Use foyer to parameterize
-    parmaeterized_molecule = GAFF.apply(molecule.to_parmed())
+    parameterized_molecule = GAFF.apply(molecule.to_parmed())
     
     # Save to whatever file format you desire
     
 Note that `antefoyer` was _never_ imported. If `antefoyer` is properly installed, the GAFF forcefield will become available under `foyer.forcefields.load_GAFF()` via `entrypoints`. 
 
-The second workflow uses the antechamber wrapper. This requires `antechamber` to be installed an accesible in your `PATH`. `Antechamber` can be installed from conda: `conda install -c ambermd ambertools`. __THIS WORKFLOW IS UNDER CONSTRUCTION AND NOT FULLY SUPPORTED BY FOYER__.
-
+The second workflow uses the antechamber wrapper. This requires `antechamber` to be installed an accesible in your `PATH`. `Antechamber` can be installed from conda: `conda install -c conda-forge ambertools`.
 
     # Assuming we also have mbuild installed for this example
     import foyer
@@ -63,16 +73,16 @@ The second workflow uses the antechamber wrapper. This requires `antechamber` to
     import antefoyer
     
     # Build/import a molecule
-    molecule = mb.load('CCC',smarts=True)
+    molecule = mb.load('CCC', smiles=True)
     
     # Load GAFF
-    GAFF = foyer.forcefields.load_GAFF()
+    gaff = foyer.forcefields.load_GAFF()
     
     # Identify GAFF atomtypes with antechamber
-    typed_molecule = antefoyer.ante_atomtyping(molecule,'gaff')
+    typed_molecule = antefoyer.ante_atomtyping(molecule, 'gaff')
     
     # Use foyer to parameterize
-    parmaeterized_molecule = GAFF.apply(typed_molecule, run_atomtyping=False)
+    parameterized_molecule = gaff.parametrize_system(typed_molecule)
     
     # We can also apply AM1-BCC charges from antechamber
     molecule_with_charges = antefoyer.ante_charges(parameterized_molecule,'bcc')

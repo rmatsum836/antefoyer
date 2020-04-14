@@ -53,9 +53,10 @@ def ante_atomtyping(molecule, atype_style):
     with temporary_directory() as tmpdir:
         with temporary_cd(tmpdir):
             # Save the existing molecule to file
-            _write_pdb(molecule,'ante_in.pdb')
+            #_write_pdb(molecule,'ante_in.pdb')
+            molecule.save('ante_in.mol2')
             # Call antechamber
-            command = ( 'antechamber -i ante_in.pdb -fi pdb '
+            command = ( 'antechamber -i ante_in.mol2 -fi mol2 '
                          '-o ante_out.mol2 -fo mol2 ' +
                          '-at ' + atype_style + ' ' +
                          '-s 2' )
@@ -117,9 +118,9 @@ def ante_charges(molecule, charge_style, net_charge=0.0,
     with temporary_directory() as tmpdir:
         with temporary_cd(tmpdir):
             # Save the existing molecule to file
-            _write_pdb(molecule,'ante_in.pdb')
+            molecule.save('ante_in.mol2')
             # Call antechamber
-            command = ( 'antechamber -i ante_in.pdb -fi pdb '
+            command = ( 'antechamber -i ante_in.mol2 -fi mol2 '
                          '-o ante_out.mol2 -fo mol2 ' +
                          '-c ' + charge_style + ' ' +
                          '-nc ' + str(net_charge) + ' ' +
@@ -141,6 +142,9 @@ def ante_charges(molecule, charge_style, net_charge=0.0,
     # Combine charge information with existing molecule structure
     assert len(molecule.atoms) == len(charges.atoms)
     for atom_idx in range(len(molecule.atoms)):
+        # This is a fix for Cl in chloroform
+        if 'Cl' in charges.atoms[atom_idx].name:
+            charges.atoms[atom_idx].element = 17
         assert molecule.atoms[atom_idx].element == \
                 charges.atoms[atom_idx].element
         molecule.atoms[atom_idx].charge = charges.atoms[atom_idx].charge
